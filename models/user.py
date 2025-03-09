@@ -6,3 +6,7 @@ class User(BaseModel):
     email: EmailStr
     password: str
     is_admin: Optional[bool] = False
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str

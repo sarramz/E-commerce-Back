@@ -21,7 +21,6 @@ app.include_router(user_router)
 def root():
     return {"message": "Welcome to E-Commerce API"}
 
-# Événements pour gérer MongoDB
 @app.on_event("startup")
 async def startup_db_client():
     await connect_to_mongo()
