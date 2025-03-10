@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from typing import List
 from config.config import db
 from models.product import Product
-
+from serializers.product_serializer import product_serializer, products_serializer
 product_router = APIRouter(prefix="/products", tags=["Produits"])
 
 @product_router.get("/", response_model=List[Product])
@@ -20,11 +20,11 @@ async def get_product(id: int):
         return product
     raise HTTPException(status_code=404, detail="Produit non trouvé")
 
-@product_router.get("/categories", response_model=List[str])
-async def get_product_categories():
-    """Obtenir toutes les catégories uniques de produits."""
-    categories = await db.products.distinct("category")
-    return categories
+# @product_router.get("/categories", response_model=List[str])
+# async def get_product_categories():
+#     """Obtenir toutes les catégories uniques de produits."""
+#     categories = await db.products.distinct("category")
+#     return categories
 
 @product_router.get("/category/{category}", response_model=List[Product])
 async def get_products_in_category(category: str, limit: int = 0, sort: str = "asc"):
@@ -33,6 +33,7 @@ async def get_products_in_category(category: str, limit: int = 0, sort: str = "a
     products = await db.products.find({"category": category}, {"_id": 0}).limit(limit).sort("id", sort_order).to_list(length=limit)
     return products
 
+
 @product_router.post("/", response_model=Product)
 async def add_product(product: Product):
     """Ajouter un nouveau produit."""
@@ -40,8 +41,11 @@ async def add_product(product: Product):
     if existing_product:
         raise HTTPException(status_code=400, detail="L'ID du produit existe déjà")
 
-    await db.products.insert_one(product.dict())
-    return product
+    new_product = product.dict()
+    await db.products.insert_one(new_product)
+
+    return new_product
+
 
 @product_router.put("/{id}", response_model=Product)
 async def edit_product(id: int, product: Product):
