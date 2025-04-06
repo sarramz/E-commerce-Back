@@ -18,6 +18,8 @@ client = AsyncIOMotorClient(MONGODB_URL)
 
 db = client.ecommerce
 users_collection = db["users"] 
+
+
 async def connect_to_mongo():
     try:
         await client.admin.command('ping')
@@ -33,3 +35,4 @@ async def close_mongo_connection():
     except Exception as e:
         print(f"Erreur lors de la fermeture de la connexion MongoDB: {e}")
         raise HTTPException(status_code=500, detail="Erreur lors de la fermeture de la connexion")
+    

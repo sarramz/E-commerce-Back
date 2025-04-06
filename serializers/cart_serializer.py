@@ -1,15 +1,21 @@
+# Fonction de sérialisation d'un panier
 def cart_serializer(cart) -> dict:
-    """Transforme un document MongoDB en dict Python pour Cart."""
+    print("DEBUG cart:", cart)  # Ajoute ça temporairement
     return {
-        "id": cart["id"],
-        "userId": cart["userId"],
-        "date": cart["date"],  # Déjà sous format ISO
+        "id": str(cart.get("_id")) if cart.get("_id") else None,
+        "userId": str(cart.get("userId")) if cart.get("userId") else None,
+        "date": cart.get("date"),
         "products": [
-            {"productId": p["productId"], "quantity": p["quantity"]}
-            for p in cart.get("products", [])
+            {
+                "productId": str(product.get("productId")),
+                "quantity": product.get("quantity")
+            }
+            for product in cart.get("products", [])
         ],
+        "total_price": cart.get("total_price", 0.0)
     }
 
+
+# Fonction de sérialisation de plusieurs paniers
 def carts_serializer(carts) -> list:
-    """Transforme une liste de paniers MongoDB en liste Python."""
     return [cart_serializer(cart) for cart in carts]
