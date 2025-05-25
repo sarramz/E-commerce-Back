@@ -5,9 +5,9 @@ from config.config import users_collection
 from models.user import User, UserLogin
 from datetime import timedelta
 
-auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
+auth_router = APIRouter(prefix="", tags=["Authentication"])
 
-@auth_router.post("/register")
+@auth_router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(user: User):
     """
     Inscription d'un utilisateur.
@@ -22,7 +22,7 @@ async def register(user: User):
         "name": user.name,
         "email": user.email,
         "password": hashed_password,
-        "role": "admin" if user.is_admin else "client"
+        "role": "admin" if getattr(user, "is_admin", False) else "client"
     }
     
     await users_collection.insert_one(new_user)
@@ -35,21 +35,19 @@ async def login(user_login: UserLogin):
     Vérifie l'email et le mot de passe, puis génère un token JWT.
     """
     user = await users_collection.find_one({"email": user_login.email})
-    
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email incorrect")
     
     if not verify_password(user_login.password, user["password"]):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Mot de passe incorrect")
     
-    # Construction correcte du payload JWT
     token_data = {
         "id": str(user["_id"]),
         "email": user["email"],
         "role": user.get("role", "client")
     }
     access_token = create_access_token(
-        data=token_data, 
+        data=token_data,
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
     

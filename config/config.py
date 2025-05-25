@@ -3,22 +3,17 @@ from fastapi import HTTPException
 from dotenv import load_dotenv
 import os
 
-# Charger les variables d'environnement depuis .env
 load_dotenv()
 
-
 MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
-
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = os.getenv("SECRET_KEY", "your_secret_key_here")
 
 if not MONGODB_URL:
     raise ValueError("MONGODB_URL is not set in .env file")
 
 client = AsyncIOMotorClient(MONGODB_URL)
-
 db = client.ecommerce
-users_collection = db["users"] 
-
+users_collection = db["users"]
 
 async def connect_to_mongo():
     try:
@@ -35,4 +30,3 @@ async def close_mongo_connection():
     except Exception as e:
         print(f"Erreur lors de la fermeture de la connexion MongoDB: {e}")
         raise HTTPException(status_code=500, detail="Erreur lors de la fermeture de la connexion")
-    
